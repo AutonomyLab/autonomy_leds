@@ -4,7 +4,7 @@ from autonomy_leds_msgs.msg import Animation, Keyframe, Command
 from std_msgs.msg import ColorRGBA
 import time, copy
 
-num_leds = 180
+num_leds = 5
 
 def main():
     display_pub = rospy.Publisher('leds/display', Keyframe, queue_size=10)

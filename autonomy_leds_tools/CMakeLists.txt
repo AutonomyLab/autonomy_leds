@@ -61,6 +61,7 @@ include_directories(
 
 ## Declare a cpp executable
 add_executable(leds_animation_engine_node src/animation_engine_node.cpp src/animation_engine.cpp)
+add_executable(bebop_api_node src/bebop_api.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -68,6 +69,9 @@ add_executable(leds_animation_engine_node src/animation_engine_node.cpp src/anim
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(leds_animation_engine_node
+   ${catkin_LIBRARIES}
+)
+ target_link_libraries(bebop_api_node
    ${catkin_LIBRARIES}
 )
 

@@ -4,7 +4,7 @@ from autonomy_leds_msgs.msg import Command, LED
 
 import time
 
-num_leds = 180
+num_leds = 9
 
 def main():
     set_pub = rospy.Publisher('leds/set', Command, queue_size=10)
@@ -39,7 +39,7 @@ def main():
     command_msg.colors_vec = []
     command_msg.flag = 0    
     for i in range(0, num_leds):
-        single_led = 0b0111111111111111 if (i < 5) else 0b0000000000011111
+        single_led = 0b0111111111111111 if (i < 2) else 0b0000000000011111
         command_msg.colors_vec.append(single_led)
     set_pub.publish(command_msg)
 
