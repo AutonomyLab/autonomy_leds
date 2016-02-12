@@ -169,6 +169,73 @@ void BebopAnimator::Process()
         anim_.keyframes.push_back(key_frame_);
         anim_.timing_function = autonomy_leds_msgs::AnimationConstPtr::element_type::TIMING_FUNCTION_LINEAR;
     }
+    else if( dir_ptr_->anim_type == autonomy_leds_msgs::FeedbackConstPtr::element_type::TYPE_FAST_BLINK)
+    {
+      key_frame_.color_pattern.clear();
+      clear_frame_.color_pattern.clear();
+      clear_frame_.color_pattern.push_back( _cc);
+      key_frame_.color_pattern.push_back( dir_ptr_->arrow_color);
+      key_frame_.start_index = 0;
+      key_frame_.duration = 0;
+      key_frame_.pattern_repeat = num_leds_;
+      anim_.keyframes.push_back(key_frame_);
+      clear_frame_.start_index = key_frame_.start_index;
+      clear_frame_.duration = 3;
+      clear_frame_.pattern_repeat = key_frame_.pattern_repeat;
+      anim_.keyframes.push_back(clear_frame_);
+      key_frame_.color_pattern.clear();
+      key_frame_.color_pattern.push_back( dir_ptr_->center_color);
+      anim_.keyframes.push_back(key_frame_);
+      anim_.keyframes.push_back(clear_frame_);
+      anim_.timing_function = autonomy_leds_msgs::AnimationConstPtr::element_type::TIMING_FUNCTION_EASE_OUT;
+    }
+    else if( dir_ptr_->anim_type == autonomy_leds_msgs::FeedbackConstPtr::element_type::TYPE_BLINK_CLEAR)
+    {
+      key_frame_.color_pattern.clear();
+      clear_frame_.color_pattern.clear();
+      clear_frame_.color_pattern.push_back( _cc);
+      key_frame_.color_pattern.push_back( dir_ptr_->arrow_color);
+      key_frame_.start_index = 0;
+      key_frame_.duration = 0;
+      key_frame_.pattern_repeat = num_leds_;
+      anim_.keyframes.push_back(key_frame_);
+      clear_frame_.start_index = key_frame_.start_index;
+      clear_frame_.duration = 6;
+      clear_frame_.pattern_repeat = key_frame_.pattern_repeat;
+      key_frame_.color_pattern.clear();
+      key_frame_.color_pattern.push_back( dir_ptr_->center_color);
+      anim_.keyframes.push_back(key_frame_);
+      key_frame_.color_pattern.clear();
+      key_frame_.color_pattern.push_back( dir_ptr_->arrow_color);
+      anim_.keyframes.push_back(key_frame_);
+      key_frame_.color_pattern.clear();
+      key_frame_.color_pattern.push_back( dir_ptr_->center_color);
+      anim_.keyframes.push_back(key_frame_);
+      key_frame_.color_pattern.clear();
+      key_frame_.color_pattern.push_back( dir_ptr_->arrow_color);
+      anim_.keyframes.push_back(key_frame_);
+      key_frame_.color_pattern.clear();
+      key_frame_.color_pattern.push_back( dir_ptr_->center_color);
+      anim_.keyframes.push_back(key_frame_);
+      anim_.keyframes.push_back(clear_frame_);
+      anim_.timing_function = autonomy_leds_msgs::AnimationConstPtr::element_type::TIMING_FUNCTION_EASE_OUT;
+    }
+    else if( dir_ptr_->anim_type == autonomy_leds_msgs::FeedbackConstPtr::element_type::TYPE_CONST_3)
+    {
+      key_frame_.color_pattern.clear();
+      key_frame_.color_pattern.push_back( dir_ptr_->arrow_color);
+      for( int i = 0; i < 3; i++)
+        key_frame_.color_pattern.push_back( _cc);
+      key_frame_.color_pattern.push_back( dir_ptr_->center_color);
+      for( int i = 0; i < 3; i++)
+        key_frame_.color_pattern.push_back( _cc);
+      key_frame_.color_pattern.push_back( dir_ptr_->arrow_color);
+      key_frame_.start_index = 0;
+      key_frame_.duration = 0;
+      key_frame_.pattern_repeat = num_leds_;
+      anim_.keyframes.push_back(key_frame_);
+      anim_.timing_function = autonomy_leds_msgs::AnimationConstPtr::element_type::TIMING_FUNCTION_LINEAR;
+    }
     anim_.iteration_count = 0;
     anim_.smooth_transition = true;
     anim_.transition_duration = 1.0/(dir_ptr_->freq/**anim_.keyframes.size()*/);
