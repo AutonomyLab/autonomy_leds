@@ -13,8 +13,11 @@
     name="rosserial_message_info" />
   <node pkg="autonomy_leds_tools" type="leds_animation_engine_node" 
     name="leds_animation_engine_node" output="screen">
-    <param name="update_rate" value="300" />
+    <param name="update_rate" value="100" />
     <param name="num_leds" value="9" />
+  </node>
+  <node pkg="autonomy_leds_tools" type="bebop_api_node" 
+    name="bebop_api_node" output="screen">
   </node>
 
 </launch>
