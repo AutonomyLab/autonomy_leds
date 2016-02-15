@@ -33,6 +33,8 @@ void BebopAnimator::DirectionTranslatorCallback(const autonomy_leds_msgs::Feedba
 void BebopAnimator::Process()
 {
     if( !dir_ptr_) return;
+    if( dir_ptr_->anim_type != autonomy_leds_msgs::FeedbackConstPtr::element_type::TYPE_LOOK_AT) 
+      last_look_dir = -9;
     anim_.keyframes.clear();
     if( dir_ptr_->anim_type == autonomy_leds_msgs::FeedbackConstPtr::element_type::TYPE_CLEAR)
     {
@@ -55,6 +57,9 @@ void BebopAnimator::Process()
         key_frame_.pattern_repeat = 1;
         int pos = ((dir_ptr_->value > 0) ? 1 : ((dir_ptr_->value < 0) ? -1 : 0))*
                 (fabs(dir_ptr_->value/max_view_ang)*(num_leds_/2))+(num_leds_/2);
+        if( pos == last_look_dir)
+          return;
+        last_look_dir = pos;
         ROS_WARN_STREAM("Loking at " << dir_ptr_->value << " Degree , LED # :" << pos);
         if( pos > int(num_leds_))
             pos = num_leds_;
@@ -74,6 +79,14 @@ void BebopAnimator::Process()
                     key_frame_.color_pattern.push_back( dir_ptr_->center_color);
                 else if(j == i+pos || j == pos-i)
                     key_frame_.color_pattern.push_back( dir_ptr_->arrow_color);
+                else if( j == i+pos+1 || j == pos-i-1)
+                {
+                  std_msgs::ColorRGBA light_arrow;
+                  light_arrow.r = dir_ptr_->arrow_color.r/2.0;
+                  light_arrow.g = dir_ptr_->arrow_color.g/2.0;
+                  light_arrow.b = dir_ptr_->arrow_color.b/2.0;
+                  key_frame_.color_pattern.push_back( light_arrow);
+                } 
                 else
                     key_frame_.color_pattern.push_back( _cc);
             }
@@ -200,7 +213,7 @@ void BebopAnimator::Process()
       key_frame_.pattern_repeat = num_leds_;
       anim_.keyframes.push_back(key_frame_);
       clear_frame_.start_index = key_frame_.start_index;
-      clear_frame_.duration = 6;
+      clear_frame_.duration = 1;
       clear_frame_.pattern_repeat = key_frame_.pattern_repeat;
       key_frame_.color_pattern.clear();
       key_frame_.color_pattern.push_back( dir_ptr_->center_color);
