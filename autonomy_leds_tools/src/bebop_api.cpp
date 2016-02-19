@@ -16,6 +16,7 @@ BebopAnimator::BebopAnimator(ros::NodeHandle& nh, const uint16_t num_leds)
 {
     update_rate_ = 9;
     num_leds_ = num_leds;
+    inited = false;
 //    Hard coded values :
     max_vel = 4.5;
     max_view_ang = 70;
@@ -26,8 +27,23 @@ BebopAnimator::BebopAnimator(ros::NodeHandle& nh, const uint16_t num_leds)
 
 void BebopAnimator::DirectionTranslatorCallback(const autonomy_leds_msgs::FeedbackConstPtr &dir_ptr)
 {
+  ROS_WARN_STREAM("message received!!!");
+  if( !inited
+      || dir_ptr_.get()->anim_type != dir_ptr.get()->anim_type
+      || dir_ptr_.get()->arrow_color.r != dir_ptr.get()->arrow_color.r
+      || dir_ptr_.get()->arrow_color.g != dir_ptr.get()->arrow_color.g
+      || dir_ptr_.get()->arrow_color.b != dir_ptr.get()->arrow_color.b
+      || dir_ptr_.get()->center_color.r != dir_ptr.get()->center_color.r
+      || dir_ptr_.get()->center_color.g != dir_ptr.get()->center_color.g
+      || dir_ptr_.get()->center_color.b != dir_ptr.get()->center_color.b
+      || dir_ptr_.get()->freq != dir_ptr.get()->freq
+      || dir_ptr_.get()->value != dir_ptr.get()->value)
+  {
+    ROS_WARN_STREAM("updated!!!");
     dir_ptr_ = dir_ptr;
-    Process();
+  }
+  inited = true;
+  Process();
 }
 
 void BebopAnimator::Process()
@@ -249,6 +265,86 @@ void BebopAnimator::Process()
       anim_.keyframes.push_back(key_frame_);
       anim_.timing_function = autonomy_leds_msgs::AnimationConstPtr::element_type::TIMING_FUNCTION_LINEAR;
     }
+    else if( dir_ptr_->anim_type == autonomy_leds_msgs::FeedbackConstPtr::element_type::TYPE_EYE)
+    {
+        clear_frame_.color_pattern.clear();
+        clear_frame_.start_index = 0;
+        clear_frame_.duration = 0;
+        clear_frame_.pattern_repeat = 1;
+        key_frame_.color_pattern.clear();
+        key_frame_.start_index = 0;
+        key_frame_.duration = 2;
+        key_frame_.pattern_repeat = 1;
+        int pos = ((dir_ptr_->value > 0) ? 1 : ((dir_ptr_->value < 0) ? -1 : 0))*
+                (fabs(dir_ptr_->value/max_view_ang)*(num_leds_/2))+(num_leds_/2);
+        if( pos == last_look_dir)
+          return;
+        last_look_dir = pos;
+        ROS_WARN_STREAM("Loking at " << dir_ptr_->value << " Degree , LED # :" << pos);
+        if( pos > int(num_leds_)-4)
+            pos = num_leds_-4;
+        else if (pos < 3)
+            pos = 3;
+        for( int i = 0; i < num_leds_; i++)
+        {
+            if( i == pos-2 || i == pos-3)
+                key_frame_.color_pattern.push_back( dir_ptr_->arrow_color);
+            else if( i == pos+3 || i == pos+2)
+                key_frame_.color_pattern.push_back( dir_ptr_->center_color);
+            else
+                key_frame_.color_pattern.push_back( _cc);
+            clear_frame_.color_pattern.push_back( _cc);
+        }
+        anim_.keyframes.push_back(key_frame_);
+        anim_.keyframes.push_back(clear_frame_);
+        anim_.timing_function = autonomy_leds_msgs::AnimationConstPtr::element_type::TIMING_FUNCTION_LINEAR;//TIMING_FUNCTION_EASE_OUT;
+    }
+    else if( dir_ptr_->anim_type == autonomy_leds_msgs::FeedbackConstPtr::element_type::TYPE_TIMER_SNAP)
+    {
+      key_frame_.color_pattern.clear();
+      clear_frame_.color_pattern.clear();
+      clear_frame_.color_pattern.push_back( _cc);
+      key_frame_.color_pattern.push_back( dir_ptr_->arrow_color);
+      key_frame_.start_index = 0;
+      key_frame_.duration = 0;
+      key_frame_.pattern_repeat = num_leds_;
+      anim_.keyframes.push_back(key_frame_);
+      clear_frame_.start_index = key_frame_.start_index;
+      clear_frame_.duration = 0;
+      clear_frame_.pattern_repeat = key_frame_.pattern_repeat;
+      anim_.keyframes.push_back(clear_frame_);
+      anim_.keyframes.push_back(key_frame_);
+      anim_.keyframes.push_back(clear_frame_);
+      clear_frame_.duration = 0.5;
+      anim_.keyframes.push_back(key_frame_);
+      anim_.keyframes.push_back(clear_frame_);
+      key_frame_.color_pattern.clear();
+      key_frame_.color_pattern.push_back( dir_ptr_->center_color);
+      key_frame_.duration = 1;
+      anim_.keyframes.push_back(key_frame_);
+      clear_frame_.duration = 3;
+      anim_.keyframes.push_back(clear_frame_);
+      anim_.timing_function = autonomy_leds_msgs::AnimationConstPtr::element_type::TIMING_FUNCTION_EASE_IN;
+    }
+    else if( dir_ptr_->anim_type == autonomy_leds_msgs::FeedbackConstPtr::element_type::TYPE_BYEBYE)
+    {
+        key_frame_.start_index = 0;
+        key_frame_.duration = 0;
+        key_frame_.pattern_repeat = 1;
+        for(int  i = num_leds_/2+1; i > -1; i--)
+        {
+          key_frame_.color_pattern.clear();
+          for( int j = 0; j < num_leds_; j++)
+            if( abs(num_leds_/2-j) < i)
+              key_frame_.color_pattern.push_back( dir_ptr_->arrow_color);
+            else
+              key_frame_.color_pattern.push_back( dir_ptr_->center_color);
+          anim_.keyframes.push_back(key_frame_);
+        }
+        key_frame_.duration = 120;
+        anim_.keyframes.push_back(key_frame_);
+        anim_.timing_function = autonomy_leds_msgs::AnimationConstPtr::element_type::TIMING_FUNCTION_LINEAR;
+    }
     anim_.iteration_count = 0;
     anim_.smooth_transition = true;
     anim_.transition_duration = 1.0/(dir_ptr_->freq/**anim_.keyframes.size()*/);
@@ -281,7 +377,7 @@ int main(int argc, char* argv[])
     ros::init(argc, argv, "bebop_api_node");
     ros::NodeHandle nh;
 
-    BebopAnimator animator(nh, 9);
+    BebopAnimator animator(nh, 11);
 
     ROS_INFO("[BBP] LEDS Animation Engine started ...");
 

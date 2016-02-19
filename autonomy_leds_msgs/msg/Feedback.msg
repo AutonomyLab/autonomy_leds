@@ -8,6 +8,9 @@ uint8 TYPE_SEARCH_2 = 6
 uint8 TYPE_FAST_BLINK = 7
 uint8 TYPE_BLINK_CLEAR = 8
 uint8 TYPE_CONST_3 = 9
+uint8 TYPE_EYE = 10
+uint8 TYPE_TIMER_SNAP = 11
+uint8 TYPE_BYEBYE = 12
 
 # Shows the message type
 # TYPE_CLEAR: to turn off all the LEDs

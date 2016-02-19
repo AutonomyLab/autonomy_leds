@@ -32,6 +32,7 @@ private:
   double max_view_ang;
   std_msgs::ColorRGBA _cc;
   int last_look_dir;
+  bool inited;
   autonomy_leds_msgs::FeedbackConstPtr dir_ptr_;
   autonomy_leds_msgs::Keyframe key_frame_, clear_frame_;
   autonomy_leds_msgs::Animation anim_;
