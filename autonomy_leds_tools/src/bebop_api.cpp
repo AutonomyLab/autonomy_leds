@@ -27,7 +27,6 @@ BebopAnimator::BebopAnimator(ros::NodeHandle& nh, const uint16_t num_leds)
 
 void BebopAnimator::DirectionTranslatorCallback(const autonomy_leds_msgs::FeedbackConstPtr &dir_ptr)
 {
-  ROS_WARN_STREAM("message received!!!");
   if( !inited
       || dir_ptr_.get()->anim_type != dir_ptr.get()->anim_type
       || dir_ptr_.get()->arrow_color.r != dir_ptr.get()->arrow_color.r
@@ -38,10 +37,7 @@ void BebopAnimator::DirectionTranslatorCallback(const autonomy_leds_msgs::Feedba
       || dir_ptr_.get()->center_color.b != dir_ptr.get()->center_color.b
       || dir_ptr_.get()->freq != dir_ptr.get()->freq
       || dir_ptr_.get()->value != dir_ptr.get()->value)
-  {
-    ROS_WARN_STREAM("updated!!!");
     dir_ptr_ = dir_ptr;
-  }
   inited = true;
   Process();
 }
@@ -76,7 +72,6 @@ void BebopAnimator::Process()
         if( pos == last_look_dir)
           return;
         last_look_dir = pos;
-        ROS_WARN_STREAM("Loking at " << dir_ptr_->value << " Degree , LED # :" << pos);
         if( pos > int(num_leds_))
             pos = num_leds_;
         else if (pos < -1)
@@ -280,7 +275,6 @@ void BebopAnimator::Process()
         if( pos == last_look_dir)
           return;
         last_look_dir = pos;
-        ROS_WARN_STREAM("Loking at " << dir_ptr_->value << " Degree , LED # :" << pos);
         if( pos > int(num_leds_)-4)
             pos = num_leds_-4;
         else if (pos < 3)
@@ -366,7 +360,7 @@ void BebopAnimator::Spin()
         // http://answers.ros.org/question/27655/what-is-the-correct-way-to-do-stuff-before-a-node-is-shutdown/
         if (!rate.sleep())
         {
-            ROS_WARN_STREAM("[BBP] missed target loop rate of " << update_rate_ << " hz.");
+            ROS_WARN_STREAM("[LEd] missed target loop rate of " << update_rate_ << " hz.");
         }
     }
 
